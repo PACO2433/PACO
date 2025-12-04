@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nova Shop</title>
+  <meta name="theme-color" content="#6a00ff"/>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">Nova Shop</div>
+  <div id="userArea" class="user-area">
+    <span id="userLabel">Invitado</span>
+    <button id="btnOpenAuth" class="btn small">Iniciar/Registrar</button>
+    <button id="btnLogout" class="btn small hidden">Cerrar sesión</button>
+  </div>
+</header>
+
+<main class="container">
+  <!-- AUTH SECTION (visible until login) -->
+  <section id="authSection" class="card auth-card">
+    <h2>Bienvenido a Nova Shop</h2>
+    <div class="muted">Inicia sesión o crea una cuenta</div>
+
+    <div class="auth-tabs">
+      <button id="tabLogin" class="tab active">Entrar</button>
+      <button id="tabRegister" class="tab">Registrar</button>
+    </div>
+
+    <form id="formLogin" class="form">
+      <label>Email</label>
+      <input id="loginEmail" type="email" required />
+      <label>Contraseña</label>
+      <input id="loginPass" type="password" required />
+      <label>Tipo</label>
+      <select id="loginRole">
+        <option value="cliente">Cliente</option>
+        <option value="vendedor">Vendedor</option>
+      </select>
+      <button type="submit" class="btn">Entrar</button>
+    </form>
+
+    <form id="formRegister" class="form hidden">
+      <label>Nombre</label>
+      <input id="regName" type="text" required />
+      <label>Email</label>
+      <input id="regEmail" type="email" required />
+      <label>Contraseña</label>
+      <input id="regPass" type="password" required />
+      <label>Tipo</label>
+      <select id="regRole">
+        <option value="cliente">Cliente</option>
+        <option value="vendedor">Vendedor</option>
+      </select>
+      <button id="btnRegister" class="btn" type="submit">Crear cuenta</button>
+    </form>
+  </section>
+
+  <!-- SHOP -->
+  <section id="shopSection" class="hidden">
+    <div class="toolbar">
+      <h2>Productos</h2>
+      <div>
+        <select id="viewFilter" class="select">
+          <option value="all">Todos</option>
+          <option value="mine">Mis productos (vendedor)</option>
+        </select>
+        <button id="btnInstall" class="btn small hidden">📥 Instalar</button>
+      </div>
+    </div>
+
+    <div id="productsGrid" class="products-grid"></div>
+
+    <div class="grid-two">
+      <aside class="card cart-card">
+        <h3>Carrito</h3>
+        <div id="cartList" class="cart-list"><div class="muted">No hay artículos</div></div>
+        <div class="cart-summary">
+          <div><span>Subtotal</span><strong id="subtotal">$0</strong></div>
+          <div><span>Envío</span><strong id="shipping">$40</strong></div>
+          <div class="total"><span>Total</span><strong id="total">$0</strong></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="btnCheckout" class="btn">Pagar</button>
+          <button id="btnClearCart" class="btn ghost">Vaciar</button>
+        </div>
+      </aside>
+
+      <aside id="vendorPanel" class="card vendor-card hidden">
+        <h3>Panel vendedor</h3>
+        <form id="formAddProduct">
+          <label>Nombre</label>
+          <input id="pTitle" required />
+          <label>Precio</label>
+          <input id="pPrice" type="number" required />
+          <label>Imagen (URL)</label>
+          <input id="pImg" />
+          <label>Descripción</label>
+          <textarea id="pDesc" rows="2"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn" type="submit">Agregar producto</button>
+            <button id="btnMySales" type="button" class="btn ghost">Mis pedidos</button>
+          </div>
+        </form>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<!-- MODAL CHECKOUT -->
+<div id="modalCheckout" class="modal hidden">
+  <div class="modal-box">
+    <h3>Finalizar compra</h3>
+    <form id="formCheckout">
+      <label>Nombre completo</label>
+      <input name="fullname" required />
+      <label>Dirección de entrega</label>
+      <input name="address" required />
+      <label>Teléfono</label>
+      <input name="phone" required />
+      <label>Método de pago</label>
+      <select name="payment" required>
+        <option value="">Selecciona</option>
+        <option value="card">Tarjeta (simulado)</option>
+        <option value="transfer">Transferencia</option>
+        <option value="cod">Contra entrega</option>
+      </select>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn" type="submit">Confirmar pago</button>
+        <button type="button" class="btn ghost" id="btnCancelCheckout">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
