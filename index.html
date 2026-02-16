@@ -1,141 +1,568 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Nova Shop</title>
-  <meta name="theme-color" content="#6a00ff"/>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta charset="UTF-8">
+<title>Gestión de Obras ALDREX</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  background:#f1f5f9;
+  color:#1e293b;
+}
+
+/* HEADER */
+header{
+  background:linear-gradient(90deg,#0f172a,#1e293b);
+  color:white;
+  padding:25px;
+  text-align:center;
+  box-shadow:0 4px 15px rgba(0,0,0,.2);
+}
+
+header h1{
+  font-size:24px;
+  font-weight:700;
+}
+
+header p{
+  margin-top:6px;
+  font-size:14px;
+  opacity:.8;
+}
+
+/* CONTENEDOR */
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:30px 20px;
+}
+
+/* TARJETAS */
+.card{
+  background:white;
+  padding:25px;
+  margin-bottom:25px;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.05);
+  transition:.3s ease;
+}
+
+.card:hover{
+  transform:translateY(-3px);
+}
+
+/* GRID DASHBOARD */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+.grid .card{
+  text-align:center;
+}
+
+.grid strong{
+  font-size:28px;
+  display:block;
+  margin-bottom:8px;
+  color:#2563eb;
+}
+
+/* INPUTS */
+input, textarea, select{
+  width:100%;
+  padding:12px 14px;
+  margin:10px 0;
+  border-radius:10px;
+  border:1px solid #e2e8f0;
+  font-size:14px;
+  transition:.3s;
+}
+
+input:focus, textarea:focus, select:focus{
+  outline:none;
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,.1);
+}
+
+/* BOTONES */
+button{
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+  background:#2563eb;
+  color:white;
+}
+
+button:hover{
+  background:#1d4ed8;
+  transform:translateY(-2px);
+}
+
+.delete{
+  background:#dc2626;
+}
+
+.delete:hover{
+  background:#b91c1c;
+}
+
+.edit{
+  background:#16a34a;
+}
+
+.edit:hover{
+  background:#15803d;
+}
+
+.export{
+  background:#0f766e;
+}
+
+.export:hover{
+  background:#115e59;
+}
+
+.logout{
+  background:#334155;
+  margin-top:10px;
+}
+
+/* BADGES */
+.badge{
+  display:inline-block;
+  padding:6px 14px;
+  border-radius:30px;
+  font-size:12px;
+  font-weight:600;
+  margin-bottom:10px;
+}
+
+.planeada{
+  background:#fef3c7;
+  color:#92400e;
+}
+
+.progreso{
+  background:#dbeafe;
+  color:#1e40af;
+}
+
+.terminada{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.retrasada{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+/* PROGRESS BAR */
+.progress{
+  background:#e2e8f0;
+  border-radius:20px;
+  overflow:hidden;
+  margin-top:10px;
+}
+
+.progress div{
+  height:22px;
+  background:linear-gradient(90deg,#16a34a,#22c55e);
+  text-align:center;
+  color:white;
+  font-size:12px;
+  font-weight:600;
+}
+
+/* LOGIN CENTRADO */
+#loginBox{
+  max-width:400px;
+  margin:60px auto;
+}
+
+.hidden{
+  display:none;
+}
+</style>
+
 </head>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js")
+  .then(() => console.log("Service Worker registrado"))
+  .catch(err => console.log("Error al registrar SW", err));
+}
+</script>
+
 <body>
 
-<header class="topbar">
-  <div class="brand">Nova Shop</div>
-  <div id="userArea" class="user-area">
-    <span id="userLabel">Invitado</span>
-    <button id="btnOpenAuth" class="btn small">Iniciar/Registrar</button>
-    <button id="btnLogout" class="btn small hidden">Cerrar sesión</button>
-  </div>
+<header>
+<h1>Sistema de Gestión de Obras ALDREX</h1>
+<p id="rolTexto">Inicio de sesión</p>
+<button id="btnCerrar" class="logout hidden" onclick="cerrarSesion()">Cerrar sesión</button>
 </header>
 
-<main class="container">
-  <!-- AUTH SECTION (visible until login) -->
-  <section id="authSection" class="card auth-card">
-    <h2>Bienvenido a Nova Shop</h2>
-    <div class="muted">Inicia sesión o crea una cuenta</div>
-
-    <div class="auth-tabs">
-      <button id="tabLogin" class="tab active">Entrar</button>
-      <button id="tabRegister" class="tab">Registrar</button>
-    </div>
-
-    <form id="formLogin" class="form">
-      <label>Email</label>
-      <input id="loginEmail" type="email" required />
-      <label>Contraseña</label>
-      <input id="loginPass" type="password" required />
-      <label>Tipo</label>
-      <select id="loginRole">
-        <option value="cliente">Cliente</option>
-        <option value="vendedor">Vendedor</option>
-      </select>
-      <button type="submit" class="btn">Entrar</button>
-    </form>
-
-    <form id="formRegister" class="form hidden">
-      <label>Nombre</label>
-      <input id="regName" type="text" required />
-      <label>Email</label>
-      <input id="regEmail" type="email" required />
-      <label>Contraseña</label>
-      <input id="regPass" type="password" required />
-      <label>Tipo</label>
-      <select id="regRole">
-        <option value="cliente">Cliente</option>
-        <option value="vendedor">Vendedor</option>
-      </select>
-      <button id="btnRegister" class="btn" type="submit">Crear cuenta</button>
-    </form>
-  </section>
-
-  <!-- SHOP -->
-  <section id="shopSection" class="hidden">
-    <div class="toolbar">
-      <h2>Productos</h2>
-      <div>
-        <select id="viewFilter" class="select">
-          <option value="all">Todos</option>
-          <option value="mine">Mis productos (vendedor)</option>
-        </select>
-        <button id="btnInstall" class="btn small hidden">📥 Instalar</button>
-      </div>
-    </div>
-
-    <div id="productsGrid" class="products-grid"></div>
-
-    <div class="grid-two">
-      <aside class="card cart-card">
-        <h3>Carrito</h3>
-        <div id="cartList" class="cart-list"><div class="muted">No hay artículos</div></div>
-        <div class="cart-summary">
-          <div><span>Subtotal</span><strong id="subtotal">$0</strong></div>
-          <div><span>Envío</span><strong id="shipping">$40</strong></div>
-          <div class="total"><span>Total</span><strong id="total">$0</strong></div>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button id="btnCheckout" class="btn">Pagar</button>
-          <button id="btnClearCart" class="btn ghost">Vaciar</button>
-        </div>
-      </aside>
-
-      <aside id="vendorPanel" class="card vendor-card hidden">
-        <h3>Panel vendedor</h3>
-        <form id="formAddProduct">
-          <label>Nombre</label>
-          <input id="pTitle" required />
-          <label>Precio</label>
-          <input id="pPrice" type="number" required />
-          <label>Imagen (URL)</label>
-          <input id="pImg" />
-          <label>Descripción</label>
-          <textarea id="pDesc" rows="2"></textarea>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button class="btn" type="submit">Agregar producto</button>
-            <button id="btnMySales" type="button" class="btn ghost">Mis pedidos</button>
-          </div>
-        </form>
-      </aside>
-    </div>
-  </section>
-</main>
-
-<!-- MODAL CHECKOUT -->
-<div id="modalCheckout" class="modal hidden">
-  <div class="modal-box">
-    <h3>Finalizar compra</h3>
-    <form id="formCheckout">
-      <label>Nombre completo</label>
-      <input name="fullname" required />
-      <label>Dirección de entrega</label>
-      <input name="address" required />
-      <label>Teléfono</label>
-      <input name="phone" required />
-      <label>Método de pago</label>
-      <select name="payment" required>
-        <option value="">Selecciona</option>
-        <option value="card">Tarjeta (simulado)</option>
-        <option value="transfer">Transferencia</option>
-        <option value="cod">Contra entrega</option>
-      </select>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn" type="submit">Confirmar pago</button>
-        <button type="button" class="btn ghost" id="btnCancelCheckout">Cancelar</button>
-      </div>
-    </form>
-  </div>
+<!-- LOGIN -->
+<div id="loginBox" class="container">
+<div class="card">
+<h3>Inicio de sesión</h3>
+<input id="loginUser" placeholder="Usuario">
+<input id="loginPass" type="password" placeholder="Contraseña">
+<button onclick="login()">Entrar</button>
+</div>
 </div>
 
-<script src="app.js"></script>
+<!-- APP -->
+<div id="app" class="container hidden">
+
+<div class="grid">
+<div class="card"><strong id="totalObras">0</strong><br>Total</div>
+<div class="card"><strong id="promedio">0%</strong><br>Promedio</div>
+<div class="card"><strong id="terminadas">0</strong><br>Terminadas</div>
+<div class="card"><strong id="proceso">0</strong><br>En progreso</div>
+</div>
+
+<div class="card">
+<button class="export" onclick="exportarCSV()">Exportar CSV</button>
+<button class="export" onclick="exportarPDF()">Exportar PDF</button>
+</div>
+
+<!-- PANEL OBRAS JEFE -->
+<div id="vistaJefe" class="card hidden">
+<h3>Registrar / Editar obra</h3>
+<input id="nombre" placeholder="Nombre">
+<textarea id="descripcion" placeholder="Descripción"></textarea>
+<input id="responsable" placeholder="Responsable">
+<label>Inicio</label>
+<input type="date" id="inicio">
+<label>Fin</label>
+<input type="date" id="fin">
+<input id="presupuesto" type="number" placeholder="Presupuesto">
+<input id="costo" type="number" placeholder="Costo">
+<input id="avance" type="number" placeholder="Avance %" min="0" max="100">
+<button onclick="guardarObra()">Guardar obra</button>
+</div>
+
+<!-- PANEL USUARIOS -->
+<div id="panelUsuarios" class="card hidden">
+<h3>Gestión de Usuarios</h3>
+
+<input id="nuevoUser" placeholder="Usuario nuevo">
+<input id="nuevoPass" type="password" placeholder="Contraseña">
+<select id="nuevoRol">
+<option value="ingeniero">Ingeniero</option>
+<option value="jefe">Jefe</option>
+</select>
+<button onclick="crearUsuario()">Crear Usuario</button>
+
+<h4>Lista de Usuarios</h4>
+<div id="listaUsuarios"></div>
+</div>
+
+<!-- LISTADO OBRAS -->
+<div class="card">
+<h3>Listado de obras</h3>
+<div id="lista" class="grid"></div>
+</div>
+
+</div>
+
+<script>
+
+/* ======================
+   SISTEMA DE USUARIOS
+======================*/
+
+// Inicializar usuario principal si no existe
+if(!localStorage.getItem("usuarios")){
+  const inicial = [{ user:"jefe", pass:"1234", rol:"jefe" }];
+  localStorage.setItem("usuarios", JSON.stringify(inicial));
+}
+
+function obtenerUsuarios(){
+  return JSON.parse(localStorage.getItem("usuarios") || "[]");
+}
+
+function guardarUsuarios(lista){
+  localStorage.setItem("usuarios", JSON.stringify(lista));
+}
+
+/* ======================
+   LOGIN
+======================*/
+
+let vistaActual="", editIndex=null;
+
+function login(){
+  const u = loginUser.value.trim();
+  const p = loginPass.value.trim();
+
+  const usuarios = obtenerUsuarios();
+  const user = usuarios.find(x => x.user === u && x.pass === p);
+
+  if(!user){
+    alert("Datos incorrectos");
+    return;
+  }
+
+  sessionStorage.setItem("usuario", JSON.stringify(user));
+  iniciarSesion(user);
+}
+
+function iniciarSesion(u){
+  loginBox.classList.add("hidden");
+  app.classList.remove("hidden");
+  btnCerrar.classList.remove("hidden");
+
+  vistaActual = u.rol;
+  rolTexto.textContent = "Rol: " + vistaActual.toUpperCase();
+
+  vistaJefe.classList.toggle("hidden", vistaActual !== "jefe");
+  panelUsuarios.classList.toggle("hidden", vistaActual !== "jefe");
+
+  mostrarObras();
+  mostrarUsuarios();
+}
+
+function cerrarSesion(){
+  sessionStorage.clear();
+  location.reload();
+}
+
+const ses = sessionStorage.getItem("usuario");
+if(ses) iniciarSesion(JSON.parse(ses));
+
+/* ======================
+   GESTIÓN DE USUARIOS
+======================*/
+
+function crearUsuario(){
+  const user = nuevoUser.value.trim();
+  const pass = nuevoPass.value.trim();
+  const rol = nuevoRol.value;
+
+  if(!user || !pass){
+    alert("Completa todos los campos");
+    return;
+  }
+
+  const usuarios = obtenerUsuarios();
+
+  if(usuarios.some(u => u.user === user)){
+    alert("El usuario ya existe");
+    return;
+  }
+
+  usuarios.push({ user, pass, rol });
+  guardarUsuarios(usuarios);
+
+  nuevoUser.value="";
+  nuevoPass.value="";
+  mostrarUsuarios();
+}
+
+function mostrarUsuarios(){
+  const usuarios = obtenerUsuarios();
+  listaUsuarios.innerHTML="";
+
+  usuarios.forEach((u,i)=>{
+    listaUsuarios.innerHTML += `
+      <div class="card">
+        <strong>${u.user}</strong> (${u.rol})
+        <input type="password" placeholder="Nueva contraseña"
+        onchange="cambiarPassword(${i}, this.value)">
+        ${u.user !== "jefe" ? 
+        `<button class="delete" onclick="eliminarUsuario(${i})">Eliminar</button>` 
+        : `<small>Usuario principal</small>`}
+      </div>
+    `;
+  });
+}
+
+function eliminarUsuario(i){
+  if(!confirm("¿Eliminar usuario?")) return;
+
+  const usuarios = obtenerUsuarios();
+  usuarios.splice(i,1);
+  guardarUsuarios(usuarios);
+  mostrarUsuarios();
+}
+
+function cambiarPassword(i,nueva){
+  if(!nueva) return;
+  const usuarios = obtenerUsuarios();
+  usuarios[i].pass = nueva;
+  guardarUsuarios(usuarios);
+  alert("Contraseña actualizada");
+}
+
+/* ======================
+   OBRAS
+======================*/
+
+function obtenerEstado(o){
+  const hoy=new Date().toISOString().split("T")[0];
+  if(o.avance==100) return ["Terminada","terminada"];
+  if(o.fin<hoy) return ["Retrasada","retrasada"];
+  if(o.avance==0) return ["Planeada","planeada"];
+  return ["En progreso","progreso"];
+}
+
+function guardarObra(){
+  if(!nombre.value || !inicio.value || !fin.value){
+    alert("Completa los campos obligatorios");
+    return;
+  }
+
+  const obras=JSON.parse(localStorage.getItem("obras")||"[]");
+
+  const o={
+    nombre:nombre.value,
+    descripcion:descripcion.value,
+    responsable:responsable.value,
+    inicio:inicio.value,
+    fin:fin.value,
+    presupuesto:presupuesto.value||0,
+    costo:costo.value||0,
+    avance:avance.value||0
+  };
+
+  editIndex==null?obras.push(o):obras[editIndex]=o;
+  editIndex=null;
+
+  localStorage.setItem("obras",JSON.stringify(obras));
+  limpiar();
+  mostrarObras();
+}
+
+function mostrarObras(){
+  const obras=JSON.parse(localStorage.getItem("obras")||"[]");
+  lista.innerHTML="";
+  let suma=0, fin=0;
+
+  obras.forEach((o,i)=>{
+    suma+=Number(o.avance);
+    if(o.avance==100) fin++;
+
+    const [t,c]=obtenerEstado(o);
+
+    lista.innerHTML+=`
+    <div class="card">
+      <h4>${o.nombre}</h4>
+      <span class="badge ${c}">${t}</span>
+      <p>${o.descripcion}</p>
+      <p>📅 ${o.inicio} → ${o.fin}</p>
+      <p>💰 $${o.costo} / $${o.presupuesto}</p>
+      <div class="progress"><div style="width:${o.avance}%">${o.avance}%</div></div>
+
+      ${vistaActual==="ingeniero"
+      ? `<input type="number" value="${o.avance}" min="0" max="100"
+         onchange="actualizarAvance(${i},this.value)">`
+      : ""}
+
+      ${vistaActual==="jefe"
+      ? `<button class="edit" onclick="editarObra(${i})">Editar</button>
+         <button class="delete" onclick="eliminarObra(${i})">Eliminar</button>`
+      : ""}
+    </div>`;
+  });
+
+  totalObras.textContent=obras.length;
+  promedio.textContent=obras.length?Math.round(suma/obras.length)+"%":"0%";
+  terminadas.textContent=fin;
+  proceso.textContent=obras.length-fin;
+}
+
+function editarObra(i){
+  const o=JSON.parse(localStorage.getItem("obras"))[i];
+  nombre.value=o.nombre;
+  descripcion.value=o.descripcion;
+  responsable.value=o.responsable;
+  inicio.value=o.inicio;
+  fin.value=o.fin;
+  presupuesto.value=o.presupuesto;
+  costo.value=o.costo;
+  avance.value=o.avance;
+  editIndex=i;
+}
+
+function eliminarObra(i){
+  if(!confirm("¿Eliminar obra?")) return;
+  const obras=JSON.parse(localStorage.getItem("obras"));
+  obras.splice(i,1);
+  localStorage.setItem("obras",JSON.stringify(obras));
+  mostrarObras();
+}
+
+function actualizarAvance(i,v){
+  const obras=JSON.parse(localStorage.getItem("obras"));
+  obras[i].avance=v;
+  localStorage.setItem("obras",JSON.stringify(obras));
+  mostrarObras();
+}
+
+function limpiar(){
+  nombre.value=descripcion.value=responsable.value=inicio.value=fin.value=presupuesto.value=costo.value=avance.value="";
+}
+
+/* ======================
+   EXPORTACIONES
+======================*/
+
+function exportarCSV(){
+  const obras=JSON.parse(localStorage.getItem("obras")||"[]");
+  let csv="Obra,Inicio,Fin,Estado,Avance,Costo,Presupuesto\n";
+
+  obras.forEach(o=>{
+    csv+=`${o.nombre},${o.inicio},${o.fin},${obtenerEstado(o)[0]},${o.avance},${o.costo},${o.presupuesto}\n`;
+  });
+
+  const blob=new Blob([csv],{type:"text/csv"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="reporte_obras.csv";
+  a.click();
+}
+
+function exportarPDF(){
+  const { jsPDF }=window.jspdf;
+  const doc=new jsPDF();
+  const obras=JSON.parse(localStorage.getItem("obras")||"[]");
+  const fecha=new Date().toLocaleDateString();
+
+  doc.setFontSize(16);
+  doc.text("REPORTE GENERAL DE OBRAS - ALDREX",105,15,{align:"center"});
+  doc.setFontSize(10);
+  doc.text("Fecha: "+fecha,10,25);
+
+  let y=35;
+  obras.forEach(o=>{
+    doc.text(`${o.nombre} - ${obtenerEstado(o)[0]}`,10,y);
+    y+=10;
+  });
+
+  doc.save("Reporte_Obras_ALDREX.pdf");
+}
+
+</script>
 </body>
 </html>
